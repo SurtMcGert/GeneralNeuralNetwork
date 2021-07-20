@@ -1,0 +1,8 @@
+build
+src\generalneuralnetwork
+test
+build.xml
+testhiddenBias
+testhoWeights
+testihWeights
+testoutputBias
