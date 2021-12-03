@@ -21,7 +21,8 @@ final class ActivationFunctions {
    * @param input - the value to pass through
    * @return double
    */
-  public static double digmoidDeriv(double input) {
+  // TODO - implement
+  public static double sigmoidDeriv(double input) {
     return 0.0;
   }
 }

@@ -32,6 +32,7 @@ public class FullyConnected implements Layer {
     return Matrix.staticMap(this.rawOutput, (double output) -> this.activation.function(output));
   }
 
+  // TODO - implement
   @Override
   public Matrix backPropogate(Matrix inp) {
     // TODO Auto-generated method stub
