@@ -18,17 +18,18 @@ import javax.imageio.ImageIO;
  */
 public class GeneralNeuralNetwork {
 
-    /**
-     * @param args the command line arguments
-     * @throws java.lang.Exception
-     */
+  /**
+   * @param args the command line arguments
+   * @throws java.lang.Exception
+   */
 
-    public GeneralNeuralNetwork() {
+  public GeneralNeuralNetwork() {
+    int[] test = { 3, 2 };
+    NeuralNetwork nn = new NeuralNetwork(test);
+  }
 
-    }
-
-    public static void main(String[] args) throws Exception {
-        new GeneralNeuralNetwork();
-    }
+  public static void main(String[] args) throws Exception {
+    new GeneralNeuralNetwork();
+  }
 
 }
