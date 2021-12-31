@@ -1,7 +1,9 @@
 package generalneuralnetwork;
 
+import NeuralNetwork.FullyConnectedLayer;
 import NeuralNetwork.Matrix;
 import NeuralNetwork.NeuralNetwork;
+import NeuralNetwork.ActivationFunctions;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -24,8 +26,47 @@ public class GeneralNeuralNetwork {
    */
 
   public GeneralNeuralNetwork() {
-    int[] test = { 3, 2 };
-    NeuralNetwork nn = new NeuralNetwork(test);
+    NeuralNetwork nn = new NeuralNetwork();
+    FullyConnectedLayer fc1 = new FullyConnectedLayer(2, 3, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
+    FullyConnectedLayer fc2 = new FullyConnectedLayer(3, 1, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
+
+    nn.addLayer(fc1);
+    nn.addLayer(fc2);
+
+
+    double[] input1 = {1.0, 1.0};
+    double[] input2 = {1.0, 0.0};
+    double[] input3 = {0.0, 1.0};
+    double[] input4 = {0.0, 0.0};
+
+    double[] answer1 = {1.0};
+    double[] answer2 = {0.0};
+
+    for(int i = 0; i < 5000; i++){
+      try {
+        nn.train(input1, answer2);
+        nn.train(input2, answer1);
+        nn.train(input3, answer1);
+        nn.train(input4, answer2);
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      
+    }
+
+    double[] output = {0};
+    try {
+      output = nn.feedforward(input4);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+    for(int i = 0; i < output.length; i++) {
+      System.out.println(Math.round(output[i]));
+    }
+
   }
 
   public static void main(String[] args) throws Exception {

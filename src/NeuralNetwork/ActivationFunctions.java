@@ -1,6 +1,6 @@
 package NeuralNetwork;
 
-final class ActivationFunctions {
+public final class ActivationFunctions {
   private ActivationFunctions() throws Exception {
     throw new Exception("Cannot be instantiated");
   }
@@ -23,6 +23,6 @@ final class ActivationFunctions {
    */
   // TODO - implement
   public static double sigmoidDeriv(double input) {
-    return 0.0;
+    return input * (1 - input);
   }
 }

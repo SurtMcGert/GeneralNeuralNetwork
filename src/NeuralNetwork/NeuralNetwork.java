@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +37,7 @@ public class NeuralNetwork {
   Matrix[] biasMatrices; // the matrecies between each layer and the bias
   Matrix[] nodeMatrices; // the values of all the nodes in the network. The first matrix is the inputs
                          // and the last matrix is the outputs
+  ArrayList<Layer> layers;
 
   /**
    * takes an integer array relating to the number of nodes in each layer of
@@ -46,7 +48,10 @@ public class NeuralNetwork {
    * @param nodes - the integer array containing how many nodes there are in
    *              each layer
    */
-  public NeuralNetwork(int[] nodes) {
+  public NeuralNetwork(){
+    this.layers = new ArrayList<>();
+  }
+  /*public NeuralNetwork(int[] nodes) {
 
     // makes all the matricies between layers
     this.numOfInputs = nodes[0];
@@ -74,6 +79,11 @@ public class NeuralNetwork {
     nodeMatrices = new Matrix[nodes.length];
     this.weightMatrices[0].view();
 
+  }*/
+
+
+  public void addLayer(Layer layer){
+    this.layers.add(layer);
   }
 
   /**
@@ -83,7 +93,7 @@ public class NeuralNetwork {
    * @param inp the array of inputs to pass through the network
    * @return the output of the neural network
    */
-  public double[] feedforward(double[] inp) throws Exception {
+  /*public double[] feedforward(double[] inp) throws Exception {
     // the array to output
     double[] output = new double[this.numOfOutputs];
     // makes sure the number of inputs is correct
@@ -113,9 +123,19 @@ public class NeuralNetwork {
       }
     }
     return output;
+  }*/
+
+  public double[] feedforward(double[] inp) throws Exception{
+    double[][] a = { inp };
+    Matrix inputs = new Matrix(a);
+    for(int i = 0; i < layers.size(); i++) {
+      inputs = this.layers.get(i).feedForward(inputs);
+    }
+
+    return inputs.returnAs2DArray()[0];
   }
 
-  public void train(double[] inputs, double[] expectations) throws Exception {
+  /*public void train(double[] inputs, double[] expectations) throws Exception {
     if (expectations.length != this.numOfOutputs) {
       throw new Exception("the network's number of outputs and the number of expectations do not match");
     } else {
@@ -150,6 +170,22 @@ public class NeuralNetwork {
 
       }
 
+    }
+  }*/
+
+  public void train(double[] inputs, double[] expectations) throws Exception {
+    double[] outputs = feedforward(inputs);
+    double[][] a = { outputs };
+    Matrix guesses = new Matrix(a);
+
+    double[][] b = { expectations };
+    Matrix correctAnswers = new Matrix(b);
+
+
+    // calculates each of the errors in the networks output
+    Matrix errors = Matrix.staticSubtract(correctAnswers, guesses);
+    for(int i = layers.size() - 1; i >= 0; i--){
+      errors = layers.get(i).backPropogate(errors, this.lr);
     }
   }
 
