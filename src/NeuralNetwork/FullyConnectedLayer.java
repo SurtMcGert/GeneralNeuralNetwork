@@ -18,13 +18,19 @@ public class FullyConnectedLayer implements Layer {
    * @param outputs - the number of outputs from the layer
    */
   public FullyConnectedLayer(int inputs, int outputs, Function activation, Function activationDeriv) {
-    this.weights = new Matrix(outputs, inputs);
-    this.weights.randVal();
-    this.bias = new Matrix(outputs, 1);
-    this.bias.randVal();
-    this.rawOutput = new Matrix(outputs, 0);
-    this.activation = activation;
-    this.activationDeriv = activationDeriv;
+    try {
+      this.weights = new Matrix(outputs, inputs);
+      this.weights.randVal();
+      this.bias = new Matrix(outputs, 1);
+      this.bias.randVal();
+      this.rawOutput = new Matrix(outputs, 1);
+      this.activation = activation;
+      this.activationDeriv = activationDeriv;
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
   }
 
   @Override

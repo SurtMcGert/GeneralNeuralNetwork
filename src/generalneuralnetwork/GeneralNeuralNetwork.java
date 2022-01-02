@@ -4,6 +4,8 @@ import NeuralNetwork.FullyConnectedLayer;
 import NeuralNetwork.Matrix;
 import NeuralNetwork.NeuralNetwork;
 import NeuralNetwork.ActivationFunctions;
+import NeuralNetwork.ConvolutionalLayer;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -25,12 +27,20 @@ public class GeneralNeuralNetwork {
    * @throws java.lang.Exception
    */
 
-  public GeneralNeuralNetwork() {
+  public GeneralNeuralNetwork() throws Exception {
     NeuralNetwork nn = new NeuralNetwork();
     FullyConnectedLayer fc1 = new FullyConnectedLayer(2, 3, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
     FullyConnectedLayer fc2 = new FullyConnectedLayer(3, 1, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
 
-    nn.addLayer(fc1);
+    ConvolutionalLayer cl = new ConvolutionalLayer(9, 3, 1, 5, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
+    
+
+    nn.addLayer(cl);
+
+    double[] inp = {1,2,3,4,5,6,7,8,9};
+    nn.feedforward(inp);
+
+    /*nn.addLayer(fc1);
     nn.addLayer(fc2);
 
 
@@ -65,7 +75,7 @@ public class GeneralNeuralNetwork {
 
     for(int i = 0; i < output.length; i++) {
       System.out.println(Math.round(output[i]));
-    }
+    }*/
 
   }
 

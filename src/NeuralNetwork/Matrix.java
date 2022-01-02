@@ -30,12 +30,17 @@ public class Matrix implements Function {
    *
    * @param rows    the number of rows you want the matrix to have
    * @param columns the number of columns you want the matrix to have
+   * @throws Exception
    */
-  public Matrix(int rows, int columns) {
+  public Matrix(int rows, int columns) throws Exception {
 
+    if((rows > 0) && (columns > 0)){
     this.rows = rows;
     this.columns = columns;
     matrix = new double[columns][rows];
+    }else{
+      throw new Exception("invalid number of rows or columns, must be greater than 0");
+    }
 
   }
 
@@ -50,9 +55,14 @@ public class Matrix implements Function {
     this.rows = m.getRows();
     this.columns = m.getColumns();
     matrix = new double[columns][rows];
+    matrix = m.returnAs2DArray();
 
   }
 
+  /**
+   * creates a matrix based off the given array, using all the same values
+   * @param arr the array to base the matrix off of
+   */
   public Matrix(double[][] arr) {
 
     this.rows = arr[0].length;
@@ -241,8 +251,9 @@ public class Matrix implements Function {
    * @param m the matrix to multiply
    * @param n the value to multiply by
    * @return the result of m * n
+   * @throws Exception
    */
-  public static Matrix staticMultiply(Matrix m, double n) {
+  public static Matrix staticMultiply(Matrix m, double n) throws Exception {
 
     Matrix newM = new Matrix(m.getRows(), m.getColumns());
     for (int i = 0; i < m.getRows(); i++) {
@@ -264,7 +275,7 @@ public class Matrix implements Function {
    * @return - the result of multiplying the two matrices together
    * @throws Exception
    */
-  public Matrix staticHadamardProduct(Matrix m1, Matrix m2) throws Exception {
+  public static Matrix staticHadamardProduct(Matrix m1, Matrix m2) throws Exception {
 
     Matrix newM = new Matrix(m1.getRows(), m2.getRows());
 
@@ -384,8 +395,9 @@ public class Matrix implements Function {
    * @param m the matrix to divide
    * @param n the value to divide by
    * @return the result of m / n
+   * @throws Exception
    */
-  public static Matrix staticDivide(Matrix m, double n) {
+  public static Matrix staticDivide(Matrix m, double n) throws Exception {
 
     Matrix newM = new Matrix(m.getRows(), m.getColumns());
     for (int i = 0; i < m.getRows(); i++) {
@@ -408,8 +420,9 @@ public class Matrix implements Function {
    * @param m1 the first matrix to divide by
    * @param m2 the second matrix to divide by
    * @return the result of m1 / m2 using elementwise division
+   * @throws Exception
    */
-  public static Matrix staticDivide(Matrix m1, Matrix m2) {
+  public static Matrix staticDivide(Matrix m1, Matrix m2) throws Exception {
 
     Matrix newM = new Matrix(m1.getRows(), m1.getColumns());
     for (int i = 0; i < m1.getRows(); i++) {
@@ -468,8 +481,9 @@ public class Matrix implements Function {
    * @param m the matrix to add the value to
    * @param n the value to add to the matrix
    * @return the result of m + n
+   * @throws Exception
    */
-  public static Matrix staticAdd(Matrix m, double n) {
+  public static Matrix staticAdd(Matrix m, double n) throws Exception {
 
     Matrix newM = new Matrix(m.getRows(), m.getColumns());
 
@@ -494,8 +508,9 @@ public class Matrix implements Function {
    * @param m1 the first matrix to add
    * @param m2 the second matrix to add
    * @return the result of m1 + m2
+   * @throws Exception
    */
-  public static Matrix staticAdd(Matrix m1, Matrix m2) {
+  public static Matrix staticAdd(Matrix m1, Matrix m2) throws Exception {
 
     Matrix newM = new Matrix(m1.getRows(), m1.getColumns());
 
@@ -557,8 +572,9 @@ public class Matrix implements Function {
    * @param m the matrix to subtract from
    * @param n the value to subtract
    * @return the result of m - n
+   * @throws Exception
    */
-  public static Matrix staticSubtract(Matrix m, double n) {
+  public static Matrix staticSubtract(Matrix m, double n) throws Exception {
 
     Matrix newM = new Matrix(m.getRows(), m.getColumns());
     for (int i = 0; i < m.getRows(); i++) {
@@ -582,8 +598,9 @@ public class Matrix implements Function {
    * @param m1 the matrix to subtract from
    * @param m2 the matrix to subtract
    * @return the result of m1 - m2
+   * @throws Exception
    */
-  public static Matrix staticSubtract(Matrix m1, Matrix m2) {
+  public static Matrix staticSubtract(Matrix m1, Matrix m2) throws Exception {
 
     Matrix newM = new Matrix(m1.getRows(), m1.getColumns());
     for (int i = 0; i < m1.getRows(); i++) {
@@ -601,9 +618,10 @@ public class Matrix implements Function {
   /**
    *
    * transposes the matrix
+   * @throws Exception
    *
    */
-  public void transpose() {
+  public void transpose() throws Exception {
 
     Matrix newM = new Matrix(this.getColumns(), this.getRows());
 
@@ -628,8 +646,9 @@ public class Matrix implements Function {
    *
    * @param m the matrix to transpose
    * @return the transposition of the given matrix
+   * @throws Exception
    */
-  public static Matrix staticTranspose(Matrix m) {
+  public static Matrix staticTranspose(Matrix m) throws Exception {
 
     Matrix newM = new Matrix(m.getColumns(), m.getRows());
 
@@ -672,8 +691,9 @@ public class Matrix implements Function {
    * @param m the matrix to apply the function to
    * @param f the function to run over the matrix
    * @return the result of f(m);
+   * @throws Exception
    */
-  public static Matrix staticMap(Matrix m, Function f) {
+  public static Matrix staticMap(Matrix m, Function f) throws Exception {
 
     Matrix newM = new Matrix(m.getRows(), m.getColumns());
 
@@ -740,6 +760,20 @@ public class Matrix implements Function {
    */
   public int getColumns() {
     return columns;
+  }
+
+/**
+ * function to return the sum of all the values in the matrix
+ * @return the sum of all the values in the matrix
+ */
+  public double sum(){
+    double sum = 0;
+    for(int y = 0; y < this.matrix[0].length; y++){
+      for(int x = 0; x < this.matrix.length; x++){
+        sum += this.matrix[x][y];
+      }
+    }
+    return sum;
   }
 
   @Override
