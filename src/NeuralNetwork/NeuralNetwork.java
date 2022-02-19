@@ -125,14 +125,25 @@ public class NeuralNetwork {
     return output;
   }*/
 
-  public double[] feedforward(double[] inp) throws Exception{
-    double[][] a = { inp };
-    Matrix inputs = new Matrix(a);
+  public <T> double[] feedforward(T[] inp) throws Exception{
+    Matrix[] inputs = new Matrix[inp.length];
+
+    for(int i = 0; i < inp.length; i++){
+      Matrix temp;
+      try{
+        temp = new Matrix((double[])inp[i]);
+      }catch(ClassCastException e){
+        temp = new Matrix((double[][])inp[i]);
+      }
+      inputs[i] = temp;
+    }
     for(int i = 0; i < layers.size(); i++) {
       inputs = this.layers.get(i).feedForward(inputs);
     }
 
-    return inputs.returnAs2DArray()[0];
+
+
+    return inputs[0].returnAs2DArray()[0];
   }
 
   /*public void train(double[] inputs, double[] expectations) throws Exception {
@@ -173,7 +184,7 @@ public class NeuralNetwork {
     }
   }*/
 
-  public void train(double[] inputs, double[] expectations) throws Exception {
+  public <T> void train(T[] inputs, double[] expectations) throws Exception {
     double[] outputs = feedforward(inputs);
     double[][] a = { outputs };
     Matrix guesses = new Matrix(a);
@@ -183,7 +194,7 @@ public class NeuralNetwork {
 
 
     // calculates each of the errors in the networks output
-    Matrix errors = Matrix.staticSubtract(correctAnswers, guesses);
+    Matrix[] errors = {Matrix.staticSubtract(correctAnswers, guesses)};
     for(int i = layers.size() - 1; i >= 0; i--){
       errors = layers.get(i).backPropogate(errors, this.lr);
     }

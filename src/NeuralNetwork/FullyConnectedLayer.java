@@ -12,10 +12,11 @@ public class FullyConnectedLayer implements Layer {
   private Function activationDeriv;
 
   /**
-   * function to create a new fully connected layer
-   * 
-   * @param inputs  - the number of inputs to the layer
-   * @param outputs - the number of outputs from the layer
+   * create a new fully connected layer
+   * @param inputs - the number of inputs into this layer
+   * @param outputs - the number of outputs this layer produces
+   * @param activation - the activation function to apply to this layer
+   * @param activationDeriv - the derivative of the given activation function
    */
   public FullyConnectedLayer(int inputs, int outputs, Function activation, Function activationDeriv) {
     try {
@@ -34,7 +35,9 @@ public class FullyConnectedLayer implements Layer {
   }
 
   @Override
-  public Matrix feedForward(Matrix inp) throws Exception {
+  public Matrix[] feedForward(Matrix[] input) throws Exception {
+    if(input.length == 1){
+    Matrix inp = new Matrix(input[0]);
     if(inp.getRows() == this.weights.getColumns()){
       this.inputs = inp;
       try {
@@ -48,18 +51,23 @@ public class FullyConnectedLayer implements Layer {
     }else{
       throw new Exception("incorrect number of inputs, should be " + this.weights.getColumns());
     }
-    return this.output;
+    Matrix[] out = {this.output};
+    return out;
+  }
+  else{
+    throw new Exception("there must only be one channel on inputs");
+  }
   }
 
   @Override
-  public Matrix backPropogate(Matrix errors, double lr) throws Exception {
+  public Matrix[] backPropogate(Matrix[] errors, double lr) throws Exception {
     //calculate the errors in this layers inputs
     Matrix tw = Matrix.staticTranspose(this.weights);
-    Matrix hiddenErrors = Matrix.staticMultiply(tw, errors);
+    Matrix[] hiddenErrors = {Matrix.staticMultiply(tw, errors[0])};
 
     //calculate the gradient
     Matrix gradient = Matrix.staticMap(this.output, (double inp) -> this.activationDeriv.function(inp));
-    gradient.hadamardProduct(errors);
+    gradient.hadamardProduct(errors[0]);
     gradient.multiply(lr);
 
     //calculate the deltas

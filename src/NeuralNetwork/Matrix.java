@@ -54,21 +54,33 @@ public class Matrix implements Function {
 
     this.rows = m.getRows();
     this.columns = m.getColumns();
-    matrix = new double[columns][rows];
-    matrix = m.returnAs2DArray();
+    this.matrix = new double[columns][rows];
+    this.matrix = m.returnAs2DArray();
 
   }
 
   /**
-   * creates a matrix based off the given array, using all the same values
+   * creates a matrix based off the given 2D array, using all the same values
    * @param arr the array to base the matrix off of
    */
   public Matrix(double[][] arr) {
 
     this.rows = arr[0].length;
     this.columns = arr.length;
-    matrix = arr;
+    this.matrix = arr;
 
+  }
+
+  /**
+   * creates a matrix based off the given 1D array putting all the arrays values into the first column.
+   * @param arr the array to base the matrix off of
+   * @param orientateAsColumn if you want the array to become a column in the matrix as opposed to a row
+   */
+  public Matrix(double[] arr) {
+    double[][] temp = {arr};
+    this.matrix = temp;
+    this.rows = arr.length;
+    this.columns = 1;
   }
 
   // -------------------------------------------------------------------------------
@@ -772,6 +784,20 @@ public class Matrix implements Function {
       for(int x = 0; x < this.matrix.length; x++){
         sum += this.matrix[x][y];
       }
+    }
+    return sum;
+  }
+
+
+  /**
+   * function to return the sum of all the values in a given column of a matrix
+   * @param column - the column to sum
+   * @return the sum of al the values in the given column of the matrix
+   */
+  public double sum(int column){
+    double sum = 0;
+    for(int row = 0; row < this.matrix[0].length; row++){
+      sum += this.matrix[column][row];
     }
     return sum;
   }

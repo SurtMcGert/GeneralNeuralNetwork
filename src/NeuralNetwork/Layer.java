@@ -15,7 +15,7 @@ public interface Layer {
    * @param inp - the list of inputs to pass through
    * @return double[] - the output of this layer
    */
-  public Matrix feedForward(Matrix inp) throws Exception;
+  public Matrix[] feedForward(Matrix[] input) throws Exception;
 
   /**
    * function to backPropogate through the layer
@@ -23,5 +23,5 @@ public interface Layer {
    * @param inp - the list of data to propogate backwards with
    * @return double[] - the new values of this layer
    */
-  public Matrix backPropogate(Matrix errors, double lr) throws Exception;
+  public Matrix[] backPropogate(Matrix[] errors, double lr) throws Exception;
 }
