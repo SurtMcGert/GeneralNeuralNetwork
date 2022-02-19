@@ -36,10 +36,10 @@ nn.train(<input>, <expectation>);
 trains the neural network on the input and the expectations
 
 # in the future
-add some way to save and load networks
-add a way to load a network from a json file
-add full functionality for the convolutional layer
-add pooling layer
+add some way to save and load networks<br />
+add a way to load a network from a json file<br />
+add full functionality for the convolutional layer<br />
+add pooling layer<br />
 
 
 # Contributing
