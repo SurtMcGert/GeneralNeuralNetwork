@@ -22,72 +22,69 @@ import javax.imageio.ImageIO;
  */
 public class GeneralNeuralNetwork {
 
-  /**
-   * @param args the command line arguments
-   * @throws java.lang.Exception
-   */
+    /**
+     * @param args the command line arguments
+     * @throws java.lang.Exception
+     */
 
+    public GeneralNeuralNetwork() throws Exception {
 
-  public GeneralNeuralNetwork() throws Exception {
+        NeuralNetwork nn = new NeuralNetwork();
+        // FullyConnectedLayer fc1 = new FullyConnectedLayer(2, 3, (double inp) ->
+        // ActivationFunctions.sigmoid(inp),
+        // (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
+        // FullyConnectedLayer fc2 = new FullyConnectedLayer(3, 1, (double inp) ->
+        // ActivationFunctions.sigmoid(inp),
+        // (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
 
-    
-    NeuralNetwork nn = new NeuralNetwork();
-    FullyConnectedLayer fc1 = new FullyConnectedLayer(2, 3, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
-    FullyConnectedLayer fc2 = new FullyConnectedLayer(3, 1, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
+        ConvolutionalLayer cl = new ConvolutionalLayer(1, 1, 2, (double inp) -> ActivationFunctions.sigmoid(inp),
+                (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
+        nn.addLayer(cl);
 
-    ConvolutionalLayer cl = new ConvolutionalLayer(1, 2, 3, (double inp) -> ActivationFunctions.sigmoid(inp), (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
-    nn.addLayer(cl);
+        double[][][] inp = {
+                { { 1.4, 0.6, 0.1 }, { 0.3, 0.1, 1.7 }, { 1.3, 0.4, 0.2 } } };
+        double[] output = nn.feedforward(inp);
 
-    double[][][] inp = {{{1.4, 0.6, 0.1, 0.4}, {0.3, 0.1, 1.7, 0.6}, {1.3, 0.4, 0.2, 0.8}, {0.3, 0.6, 0.1, 0.8}}};
-    double[] output = nn.feedforward(inp);
-    
+        // nn.addLayer(fc1);
+        // nn.addLayer(fc2);
 
-    
+        // double[][] input1 = { { 1.0, 1.0 } };
+        // double[][] input2 = { { 1.0, 0.0 } };
+        // double[][] input3 = { { 0.0, 1.0 } };
+        // double[][] input4 = { { 0.0, 0.0 } };
 
+        // double[] answer1 = { 1.0 };
+        // double[] answer2 = { 0.0 };
 
-/*
-    nn.addLayer(fc1);
-    nn.addLayer(fc2);
+        // for (int i = 0; i < 5000; i++) {
+        // try {
+        // nn.train(input1, answer2);
+        // nn.train(input2, answer1);
+        // nn.train(input3, answer1);
+        // nn.train(input4, answer2);
+        // } catch (Exception e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
 
+        // }
 
-    double[][] input1 = {{1.0, 1.0}};
-    double[][] input2 = {{1.0, 0.0}};
-    double[][] input3 = {{0.0, 1.0}};
-    double[][] input4 = {{0.0, 0.0}};
+        // double[] output = { 0 };
+        // try {
+        // output = nn.feedforward(input2);
+        // } catch (Exception e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
 
-    double[] answer1 = {1.0};
-    double[] answer2 = {0.0};
+        // for (int i = 0; i < output.length; i++) {
+        // System.out.println(Math.round(output[i]));
+        // }
 
-    for(int i = 0; i < 5000; i++){
-      try {
-        nn.train(input1, answer2);
-        nn.train(input2, answer1);
-        nn.train(input3, answer1);
-        nn.train(input4, answer2);
-      } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      
     }
 
-    double[] output = {0};
-    try {
-      output = nn.feedforward(input2);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    public static void main(String[] args) throws Exception {
+        new GeneralNeuralNetwork();
     }
-
-    for(int i = 0; i < output.length; i++) {
-      System.out.println(Math.round(output[i]));
-    }
-    */
-
-  }
-
-  public static void main(String[] args) throws Exception {
-    new GeneralNeuralNetwork();
-  }
 
 }
