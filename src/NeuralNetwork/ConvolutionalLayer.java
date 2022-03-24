@@ -44,9 +44,10 @@ public class ConvolutionalLayer implements Layer {
         int inputWidth = input[0].getColumns();
         int possibleFits = inputWidth - this.kernalSize + 1;
         // format the filters into a sparse matrix of weights
-        Matrix formattedWeights = new Matrix(flattenedInputs.getColumns(), this.kernalSize * this.kernalSize);
+        Matrix formattedWeights = new Matrix(flattenedInputs.getColumns(),
+                this.kernalSize * this.kernalSize * this.filters.getColumns());
         int moveDownCounter = 0;
-        for (int column = 0; column < formattedWeights.getColumns(); column++) {
+        for (int column = 0; column < this.kernalSize * this.kernalSize; column++) {
             int filterIndex = 0;
             int fitCounter = 0;
             if (column % possibleFits == 0) {
@@ -56,34 +57,40 @@ public class ConvolutionalLayer implements Layer {
             }
             int rowMoveDownCounter = 0;
             for (int row = 0; row < input[0].getColumns() * input[0].getRows(); row++) {
-                if (row < column) {
-                    for (int offset = 0; offset < formattedWeights.getRows(); offset += input[0].getColumns()
-                            * input[0].getRows()) {
-                        formattedWeights.set(row + offset, column, 0);
-                    }
-                } else if (rowMoveDownCounter < moveDownCounter) {
-                    for (int offset = 0; offset < formattedWeights.getRows(); offset += input[0].getColumns()
-                            * input[0].getRows()) {
-                        formattedWeights.set(row + offset, column, 0);
-                    }
-                    rowMoveDownCounter++;
-                } else {
-                    if ((fitCounter < possibleFits) && (filterIndex < this.filters.getRows())) {
-                        for (int offset = 0; offset < formattedWeights.getRows(); offset += input[0].getColumns()
-                                * input[0].getRows()) {
-                            int filter = 0;
-                            formattedWeights.set(row + offset, column, this.filters.valAt(filterIndex, filter));
+                int filterRowOffset = 0;
+                rowLoop: if ((fitCounter < possibleFits) && (filterIndex < this.kernalSize * this.kernalSize)) {
+                    for (int rowOffset = 0; rowOffset < formattedWeights
+                            .getRows(); rowOffset += input[0].getColumns()
+                                    * input[0].getRows()) {
+                        int filter = 0;
+                        for (int columnOffset = 0; columnOffset < formattedWeights
+                                .getColumns(); columnOffset += this.kernalSize * this.kernalSize) {
+                            if (row < column) {
+                                // formattedWeights.set(row + rowOffset, column + columnOffset, 0);
+                                break rowLoop;
+                            } else if (rowMoveDownCounter < moveDownCounter) {
+                                // formattedWeights.set(row + rowOffset, column + columnOffset, 0);
+                                rowMoveDownCounter++;
+                                break rowLoop;
+                            } else {
+                                formattedWeights.set(row + rowOffset, column + columnOffset,
+                                        this.filters.valAt(filterIndex + filterRowOffset, filter));
+                            }
                             filter++;
+                            rowMoveDownCounter++;
                         }
-                        filterIndex++;
-                        fitCounter++;
-                    } else {
-                        fitCounter = 0;
-                        for (int offset = 0; offset < formattedWeights.getRows(); offset += input[0].getColumns()
-                                * input[0].getRows()) {
-                            formattedWeights.set(row + offset, column, 0);
-                        }
+                        filterRowOffset += this.kernalSize * this.kernalSize;
+
                     }
+                    filterIndex++;
+                    fitCounter++;
+                } else {
+                    fitCounter = 0;
+                    // for (int offset = 0; offset < formattedWeights.getRows(); offset +=
+                    // input[0].getColumns()
+                    // * input[0].getRows()) {
+                    // formattedWeights.set(row + offset, column, 0);
+                    // }
                 }
             }
         }
