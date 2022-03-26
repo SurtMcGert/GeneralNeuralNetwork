@@ -37,7 +37,7 @@ public class GeneralNeuralNetwork {
         // ActivationFunctions.sigmoid(inp),
         // (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
 
-        ConvolutionalLayer cl = new ConvolutionalLayer(2, 2, 2, (double inp) -> ActivationFunctions.sigmoid(inp),
+        ConvolutionalLayer cl = new ConvolutionalLayer(2, 1, 3, (double inp) -> ActivationFunctions.sigmoid(inp),
                 (double inp) -> ActivationFunctions.sigmoidDeriv(inp));
         nn.addLayer(cl);
 

@@ -41,92 +41,18 @@ public class ConvolutionalLayer implements Layer {
         // flatten the inputs
         Matrix flattenedInputs = flattenInputs(input);
         this.inputs = flattenedInputs;
-        int inputWidth = input[0].getColumns();
-        int possibleFits = inputWidth - this.kernalSize + 1;
         // format the filters into a sparse matrix of weights
-        Matrix formattedWeights = new Matrix(flattenedInputs.getColumns(),
-                this.kernalSize * this.kernalSize * this.filters.getColumns());
-        int moveDownCounter = 0;
-        for (int column = 0; column < this.kernalSize * this.kernalSize; column++) {
-            int filterIndex = 0;
-            int fitCounter = 0;
-            if (column % possibleFits == 0) {
-                if (column != 0) {
-                    moveDownCounter++;
-                }
-            }
-            int rowMoveDownCounter = 0;
-            for (int row = 0; row < input[0].getColumns() * input[0].getRows(); row++) {
-                int filterRowOffset = 0;
-                rowLoop: if ((fitCounter < possibleFits) && (filterIndex < this.kernalSize * this.kernalSize)) {
-                    for (int rowOffset = 0; rowOffset < formattedWeights
-                            .getRows(); rowOffset += input[0].getColumns()
-                                    * input[0].getRows()) {
-                        int filter = 0;
-                        for (int columnOffset = 0; columnOffset < formattedWeights
-                                .getColumns(); columnOffset += this.kernalSize * this.kernalSize) {
-                            if (row < column) {
-                                // formattedWeights.set(row + rowOffset, column + columnOffset, 0);
-                                break rowLoop;
-                            } else if (rowMoveDownCounter < moveDownCounter) {
-                                // formattedWeights.set(row + rowOffset, column + columnOffset, 0);
-                                rowMoveDownCounter++;
-                                break rowLoop;
-                            } else {
-                                formattedWeights.set(row + rowOffset, column + columnOffset,
-                                        this.filters.valAt(filterIndex + filterRowOffset, filter));
-                            }
-                            filter++;
-                            rowMoveDownCounter++;
-                        }
-                        filterRowOffset += this.kernalSize * this.kernalSize;
+        Matrix formattedWeights = convertWeightsToSparseMatrix(input);
 
-                    }
-                    filterIndex++;
-                    fitCounter++;
-                } else {
-                    fitCounter = 0;
-                    // for (int offset = 0; offset < formattedWeights.getRows(); offset +=
-                    // input[0].getColumns()
-                    // * input[0].getRows()) {
-                    // formattedWeights.set(row + offset, column, 0);
-                    // }
-                }
-            }
-        }
-
-        formattedWeights.view();
         Matrix multiplied = Matrix.staticMultiply(flattenedInputs, formattedWeights);
+        System.out.println("inputs");
+        input[0].view();
+        System.out.println("sparse weights");
+        formattedWeights.view();
+        System.out.println("multiplied");
+        multiplied.view();
 
         return this.output;
-
-        // this.inputs = input;
-        // Matrix currentFeature;
-        // int outputMatrixWidth = (input[0].getColumns() - this.kernalSize) + 1;
-        // int outputMatrixHeight = (input[0].getRows() - this.kernalSize) + 1;
-        // Matrix temp = new Matrix(outputMatrixHeight, outputMatrixWidth);
-        // for (int i = 0; i < this.rawOutput.length; i++) {
-        // this.rawOutput[i] = temp;
-        // }
-
-        // for (int y = 0; y < outputMatrixHeight; y++) {
-        // for (int x = 0; x < outputMatrixWidth; x++) {
-        // currentFeature = getConvolution(x, y);
-        // Matrix currentConvolvedFeatures = Matrix.staticMultiply(currentFeature,
-        // this.filters);
-        // for (int i = 0; i < this.rawOutput.length; i++) {
-        // this.rawOutput[i].set(y, x, currentConvolvedFeatures.valAt(0, i));
-        // this.rawOutput[i].view();
-        // }
-        // }
-        // }
-
-        // for (int i = 0; i < this.output.length; i++) {
-        // this.output[i] = Matrix.staticMap(this.rawOutput[i], (double output) ->
-        // this.activation.function(output));
-        // }
-
-        // return this.output;
     }
 
     @Override
@@ -151,6 +77,48 @@ public class ConvolutionalLayer implements Layer {
         // calculate the deltas
 
         return null;
+    }
+
+    /**
+     * function to convert the weights of the filters into a sparse matrix
+     * 
+     * @param input - the inputs to this layer
+     * @return - a sparse matrix of all the weights
+     * @throws Exception
+     */
+    private Matrix convertWeightsToSparseMatrix(Matrix[] input) throws Exception{
+        int inputWidth = input[0].getColumns();
+        int inputHeight = input[0].getRows();
+        int possibleHorizontalFits = inputWidth - this.kernalSize + 1;
+        int possibleVerticalFits = inputHeight - this.kernalSize + 1;
+        Matrix formattedWeights;
+        formattedWeights = new Matrix(this.inputs.getColumns(), possibleHorizontalFits*possibleVerticalFits * this.filters.getColumns());
+        int padding = inputWidth - this.kernalSize;
+
+        for(int column = 0; column < possibleHorizontalFits * possibleVerticalFits; column++){
+            int row = column / possibleHorizontalFits;
+            if(row > 0){
+                row *= inputWidth;
+            }
+            row += (column % possibleHorizontalFits);
+            int startPadding = row;
+            int filterRow = 0;
+            for(row = row; row < inputWidth * inputHeight; row++){
+                for(int sparseColumn = 0; sparseColumn < formattedWeights.getColumns(); sparseColumn+= possibleHorizontalFits * possibleVerticalFits){
+                    for(int sparseRow = 0; sparseRow < formattedWeights.getRows(); sparseRow+= inputWidth*inputHeight){
+                        formattedWeights.set(row + sparseRow, column + sparseColumn, this.filters.valAt(filterRow, sparseColumn / (possibleHorizontalFits * possibleVerticalFits)));
+                    }
+                }
+                if((filterRow + 1)== this.kernalSize * this.kernalSize){
+                    break;
+                }
+                if((((row - startPadding) + 2) % inputWidth == 0) && (row != 0)){
+                    row += padding;
+                }
+                filterRow++;
+            }
+        }
+        return formattedWeights;
     }
 
     /**
@@ -180,34 +148,36 @@ public class ConvolutionalLayer implements Layer {
         return flattenedInputs;
     }
 
-    /**
-     * function to get a kernal sized area of each input streams and arrange them as
-     * a row in a matrix
-     * 
-     * @param inpX - the x position of index to get the area from
-     * @param inpY - the y position of the index to get the area from
-     * @return - a kernal sized area of each input stream arranged as a row in a
-     *         matrix
-     * @throws Exception
-     */
-    private Matrix getConvolution(int inpX, int inpY) throws Exception {
-        Matrix convolution;
-        double[] output = new double[this.kernalSize * this.kernalSize * this.inputs.length];
-        int pos = 0;
+    // /**
+    // * function to get a kernal sized area of each input streams and arrange them
+    // as
+    // * a row in a matrix
+    // *
+    // * @param inpX - the x position of index to get the area from
+    // * @param inpY - the y position of the index to get the area from
+    // * @return - a kernal sized area of each input stream arranged as a row in a
+    // * matrix
+    // * @throws Exception
+    // */
+    // private Matrix getConvolution(int inpX, int inpY) throws Exception {
+    // Matrix convolution;
+    // double[] output = new double[this.kernalSize * this.kernalSize *
+    // this.inputs.length];
+    // int pos = 0;
 
-        for (int stream = 0; stream < this.inputs.length; stream++) {
-            for (int x = inpX; x < inpX + this.kernalSize; x++) {
-                for (int y = inpY; y < inpY + this.kernalSize; y++) {
-                    output[pos] = this.inputs[stream].valAt(y, x);
-                    pos++;
-                }
-            }
-        }
+    // for (int stream = 0; stream < this.inputs.length; stream++) {
+    // for (int x = inpX; x < inpX + this.kernalSize; x++) {
+    // for (int y = inpY; y < inpY + this.kernalSize; y++) {
+    // output[pos] = this.inputs[stream].valAt(y, x);
+    // pos++;
+    // }
+    // }
+    // }
 
-        convolution = new Matrix(output);
-        convolution.transpose();
+    // convolution = new Matrix(output);
+    // convolution.transpose();
 
-        return convolution;
-    }
+    // return convolution;
+    // }
 
 }
