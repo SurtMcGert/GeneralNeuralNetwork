@@ -48,6 +48,8 @@ public class GeneralNeuralNetwork {
         // { { 1.4, 0.6, 0.1 }, { 0.3, 0.1, 1.7 }, { 1.3, 0.4, 0.2 } } };
         double[] output = nn.feedforward(inp);
 
+        System.out.println(ActivationFunctions.tanh(-1));
+
         // nn.addLayer(fc1);
         // nn.addLayer(fc2);
 

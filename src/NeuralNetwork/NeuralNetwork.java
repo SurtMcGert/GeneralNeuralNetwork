@@ -22,64 +22,26 @@ import java.util.logging.Logger;
  *
  * @author harry
  */
-public class NeuralNetwork {
+public class NeuralNetwork implements Cloneable{
 
   private int numOfInputs; // number of inputs the network expects
   private int numOfOutputs; // the number of outputs the network will return
-
-  private Matrix inputs; // the inputs from the user
-
   private double lr = 0.05; // the learning rate of the network
+  ArrayList<Layer> layers; //the array of layers in the network
 
-  private boolean returnProbabilities = true;
+  @Override
+  protected Object clone()
+      throws CloneNotSupportedException
+  {
+      return super.clone();
+  }
 
-  Matrix[] weightMatrices; // the matrecies between layers
-  Matrix[] biasMatrices; // the matrecies between each layer and the bias
-  Matrix[] nodeMatrices; // the values of all the nodes in the network. The first matrix is the inputs
-                         // and the last matrix is the outputs
-  ArrayList<Layer> layers;
-
-  /**
-   * takes an integer array relating to the number of nodes in each layer of
-   * the network. the first element is the number of inputs, the last element
-   * is the number of outputs, and the elements in between are for hidden
-   * layers.
-   *
-   * @param nodes - the integer array containing how many nodes there are in
-   *              each layer
-   */
+/**
+ * create a new neural network
+ */
   public NeuralNetwork(){
     this.layers = new ArrayList<>();
   }
-  /*public NeuralNetwork(int[] nodes) {
-
-    // makes all the matricies between layers
-    this.numOfInputs = nodes[0];
-    this.numOfOutputs = nodes[nodes.length - 1];
-    weightMatrices = new Matrix[nodes.length - 1];
-    Matrix matrix;
-
-    // loops over the hidden layer matrix array and creates all the necessary hidden
-    // matricies
-    for (int i = 0; i < weightMatrices.length; i++) {
-      matrix = new Matrix(nodes[i + 1], nodes[i]);
-      matrix.randVal();
-      weightMatrices[i] = matrix;
-    }
-
-    // makes the matrices between the bias and the hidden layers
-    biasMatrices = new Matrix[nodes.length - 1];
-    // loops over the bias matrix array and creates all the necessary bias matricies
-    for (int i = 0; i < biasMatrices.length; i++) {
-      matrix = new Matrix(nodes[i + 1], 1);
-      matrix.fill(0);
-      biasMatrices[i] = matrix;
-    }
-
-    nodeMatrices = new Matrix[nodes.length];
-    this.weightMatrices[0].view();
-
-  }*/
 
 
   public void addLayer(Layer layer){
@@ -93,38 +55,6 @@ public class NeuralNetwork {
    * @param inp the array of inputs to pass through the network
    * @return the output of the neural network
    */
-  /*public double[] feedforward(double[] inp) throws Exception {
-    // the array to output
-    double[] output = new double[this.numOfOutputs];
-    // makes sure the number of inputs is correct
-    if (inp.length != this.numOfInputs) {
-      throw new Exception("there should be " + this.numOfInputs + " input(s)");
-    } else {
-      // sets up the matrices for the inputs, hiddens and ouptuts
-      double[][] a = { inp };
-      inputs = new Matrix(a);
-
-      // gets the values for the hidden nodes
-      nodeMatrices[0] = inputs; // puts the inputs into the node matrix
-      // loops over all the other hidden layers and works out their values
-      for (int i = 1; i < nodeMatrices.length; i++) {
-
-        nodeMatrices[i] = Matrix.staticMultiply(weightMatrices[i - 1], nodeMatrices[i - 1]);
-        // adds the bias to the values
-        nodeMatrices[i].add(biasMatrices[i - 1]);
-
-        // applies the activation function to the nodes values
-        nodeMatrices[i].map((double inp1) -> activation(inp1));
-
-      }
-      // loop over the last matrix (oututs) and put them into the output array
-      for (int i = 0; i < output.length; i++) {
-        output[i] = nodeMatrices[nodeMatrices.length - 1].valAt(i, 0);
-      }
-    }
-    return output;
-  }*/
-
   public <T> double[] feedforward(T[] inp) throws Exception{
     Matrix[] inputs = new Matrix[inp.length];
 
@@ -146,44 +76,13 @@ public class NeuralNetwork {
     return inputs[0].returnAs2DArray()[0];
   }
 
-  /*public void train(double[] inputs, double[] expectations) throws Exception {
-    if (expectations.length != this.numOfOutputs) {
-      throw new Exception("the network's number of outputs and the number of expectations do not match");
-    } else {
-      // array to store all the network errors
-      Matrix[] networkErrors = new Matrix[nodeMatrices.length - 1];
-      // turns the outputs of the network into a matrix
-      double[] outputs = feedforward(inputs);
-      double[][] a = { outputs };
-      Matrix guesses = new Matrix(a);
-      // turns the expecations into a matrix
-      double[][] b = { expectations };
-      Matrix correctAnswers = new Matrix(b);
-      // calculates each of the errors in the networks output
-      Matrix errors = Matrix.staticSubtract(correctAnswers, guesses);
-      networkErrors[networkErrors.length - 1] = errors;
-      // calculate the errors in each layer and corrects the weight matrices
-      for (int i = weightMatrices.length - 1; i >= 0; i--) {
-        if (i > 0) {
-          Matrix tw = Matrix.staticTranspose(weightMatrices[i]);
-          Matrix hiddenErrors = Matrix.staticMultiply(tw, networkErrors[i]);
-          networkErrors[i - 1] = hiddenErrors;
-        }
-        Matrix gradient = Matrix.staticMap(nodeMatrices[i + 1], (double inp) -> activationDiriv(inp));
-        gradient.hadamardProduct(networkErrors[i]);
-        gradient.multiply(lr);
-
-        // calculate deltas
-        Matrix transposedHiddens = Matrix.staticTranspose(nodeMatrices[i]);
-        Matrix weightDeltas = Matrix.staticMultiply(gradient, transposedHiddens);
-        weightMatrices[i].add(weightDeltas);
-        biasMatrices[i].add(gradient);
-
-      }
-
-    }
-  }*/
-
+  /**
+   * function to train the neural network on a given training example
+   * @param <T>
+   * @param inputs - the inputs to test the network on
+   * @param expectations - the expected output of the network
+   * @throws Exception
+   */
   public <T> void train(T[] inputs, double[] expectations) throws Exception {
     double[] outputs = feedforward(inputs);
     double[][] a = { outputs };
@@ -205,26 +104,26 @@ public class NeuralNetwork {
    *
    * @param name the name of the file you want to save to
    */
-  public void saveNetwork(String name) {
+  // public void saveNetwork(String name) {
 
-    try {
-      for (int i = 0; i < weightMatrices.length; i++) {
-        String fileName = name + "weights_" + i;
-        double[] weights = twoDArrayToOneDArray(weightMatrices[i].returnAs2DArray());
-        byte[] data = convertDoubleArrayToByteArray(weights); // converts the colomns of the matrix to byte arrays
-        saveData(fileName, data);
-      }
-      for (int i = 0; i < biasMatrices.length; i++) {
-        String fileName = name + "bias_" + i;
-        double[] bias = twoDArrayToOneDArray(biasMatrices[i].returnAs2DArray());
-        byte[] data = convertDoubleArrayToByteArray(bias); // converts the colomns of the matrix to byte arrays
-        saveData(fileName, data);
-      }
-    } catch (IOException ex) {
-      ex.printStackTrace();
-    }
+  //   try {
+  //     for (int i = 0; i < weightMatrices.length; i++) {
+  //       String fileName = name + "weights_" + i;
+  //       double[] weights = twoDArrayToOneDArray(weightMatrices[i].returnAs2DArray());
+  //       byte[] data = convertDoubleArrayToByteArray(weights); // converts the colomns of the matrix to byte arrays
+  //       saveData(fileName, data);
+  //     }
+  //     for (int i = 0; i < biasMatrices.length; i++) {
+  //       String fileName = name + "bias_" + i;
+  //       double[] bias = twoDArrayToOneDArray(biasMatrices[i].returnAs2DArray());
+  //       byte[] data = convertDoubleArrayToByteArray(bias); // converts the colomns of the matrix to byte arrays
+  //       saveData(fileName, data);
+  //     }
+  //   } catch (IOException ex) {
+  //     ex.printStackTrace();
+  //   }
 
-  }
+  // }
 
   /**
    * takes a file name and array of byte data and writes the array f bytes to a
@@ -235,19 +134,19 @@ public class NeuralNetwork {
    * @throws FileNotFoundException
    * @throws IOException
    */
-  private void saveData(String name, byte[] data) throws FileNotFoundException, IOException {
-    FileOutputStream fos;
-    BufferedOutputStream writer;
+  // private void saveData(String name, byte[] data) throws FileNotFoundException, IOException {
+  //   FileOutputStream fos;
+  //   BufferedOutputStream writer;
 
-    fos = new FileOutputStream(new File(name));
-    writer = new BufferedOutputStream(fos);
-    writer.write(data, 0, data.length); // write the data to the file
-    // flush remaining bytes
-    writer.flush();
-    // close the writer
-    writer.close();
+  //   fos = new FileOutputStream(new File(name));
+  //   writer = new BufferedOutputStream(fos);
+  //   writer.write(data, 0, data.length); // write the data to the file
+  //   // flush remaining bytes
+  //   writer.flush();
+  //   // close the writer
+  //   writer.close();
 
-  }
+  // }
 
   /**
    * loads the neural network weight values from files
@@ -255,27 +154,27 @@ public class NeuralNetwork {
    * @param name - name of the neural network
    * @throws IOException
    */
-  public void loadNetwork(String name) throws IOException {
+  // public void loadNetwork(String name) throws IOException {
 
-    try {
-      // loads the weights
-      for (int i = 0; i < weightMatrices.length; i++) {
-        String fileName = name + "weights_" + i;
-        double[][] weights = weightMatrices[i].returnAs2DArray();
-        weightMatrices[i] = new Matrix(loadData(fileName, weights));
-      }
-      // loads the biases
-      for (int i = 0; i < biasMatrices.length; i++) {
-        String fileName = name + "bias_" + i;
-        double[][] bias = biasMatrices[i].returnAs2DArray();
-        biasMatrices[i] = new Matrix(loadData(fileName, bias));
-      }
-    } catch (Exception e) {
-      System.out.println(e);
+  //   try {
+  //     // loads the weights
+  //     for (int i = 0; i < weightMatrices.length; i++) {
+  //       String fileName = name + "weights_" + i;
+  //       double[][] weights = weightMatrices[i].returnAs2DArray();
+  //       weightMatrices[i] = new Matrix(loadData(fileName, weights));
+  //     }
+  //     // loads the biases
+  //     for (int i = 0; i < biasMatrices.length; i++) {
+  //       String fileName = name + "bias_" + i;
+  //       double[][] bias = biasMatrices[i].returnAs2DArray();
+  //       biasMatrices[i] = new Matrix(loadData(fileName, bias));
+  //     }
+  //   } catch (Exception e) {
+  //     System.out.println(e);
 
-    }
+  //   }
 
-  }
+  // }
 
   /**
    * loads data from a given file name into an array passed in by the user.
@@ -285,28 +184,22 @@ public class NeuralNetwork {
    * @return - the array with the data in
    * @throws IOException
    */
-  private double[][] loadData(String name, double[][] weights) throws IOException {
-    FileInputStream fis = new FileInputStream(name);// creates a new input stream
-    BufferedInputStream bis = new BufferedInputStream(fis);
-    DataInputStream dis = new DataInputStream(bis);
-    byte[] buffer = new byte[weights[0].length * 8]; // makes a byte oarray the same size as one column in the matrix
-    int line = 0;
-    // loops over each amount of data in the file and puts it into columns in the 2D
-    // array
-    while (dis.read(buffer) != -1) {
-      double[] data = convertByteArrayToDoubleArray(buffer);
-      weights[line] = data;
-      line++;
-    }
+  // private double[][] loadData(String name, double[][] weights) throws IOException {
+  //   FileInputStream fis = new FileInputStream(name);// creates a new input stream
+  //   BufferedInputStream bis = new BufferedInputStream(fis);
+  //   DataInputStream dis = new DataInputStream(bis);
+  //   byte[] buffer = new byte[weights[0].length * 8]; // makes a byte oarray the same size as one column in the matrix
+  //   int line = 0;
+  //   // loops over each amount of data in the file and puts it into columns in the 2D
+  //   // array
+  //   while (dis.read(buffer) != -1) {
+  //     double[] data = convertByteArrayToDoubleArray(buffer);
+  //     weights[line] = data;
+  //     line++;
+  //   }
 
-    return weights;
-  }
-
-  public void returnProbabilities(boolean n) {
-
-    this.returnProbabilities = n;
-
-  }
+  //   return weights;
+  // }
 
   /**
    *
@@ -317,24 +210,24 @@ public class NeuralNetwork {
    * @param inp the value to squash
    * @return the result of the sigmoid function applied to inp
    */
-  private double activation(double inp) {
+  // private double activation(double inp) {
 
-    double output = 0;
+  //   double output = 0;
 
-    if (returnProbabilities == true) {
+  //   if (returnProbabilities == true) {
 
-      // output = (1 / (1 + (Math.pow(Math.E, (-inp)))));
-      output = 1.0 / (1.0 + Math.exp(-inp));
+  //     // output = (1 / (1 + (Math.pow(Math.E, (-inp)))));
+  //     output = 1.0 / (1.0 + Math.exp(-inp));
 
-    } else {
+  //   } else {
 
-      output = Math.max(0.0, inp);
+  //     output = Math.max(0.0, inp);
 
-    }
+  //   }
 
-    return output;
+  //   return output;
 
-  }
+  // }
 
   /**
    *
@@ -344,27 +237,27 @@ public class NeuralNetwork {
    * @param a the number you want to revert
    * @return the original number before the activation was applied
    */
-  private double activationDiriv(double a) {
+  // private double activationDiriv(double a) {
 
-    double output = 0;
+  //   double output = 0;
 
-    if (returnProbabilities == true) {
-      output = a * (1 - a);
+  //   if (returnProbabilities == true) {
+  //     output = a * (1 - a);
 
-    } else {
+  //   } else {
 
-      output = 0;
-      if (a > 0) {
-        output = 1;
-      } else {
-        output = 0;
-      }
+  //     output = 0;
+  //     if (a > 0) {
+  //       output = 1;
+  //     } else {
+  //       output = 0;
+  //     }
 
-    }
+  //   }
 
-    return output;
+  //   return output;
 
-  }
+  // }
 
   private byte[] convertDoubleArrayToByteArray(double[] data) {
     if (data == null) {
@@ -454,4 +347,20 @@ public class NeuralNetwork {
     return output;
   }
 
+  /**
+   * function to set the learning rate of the neural network
+   * @param lr
+   */
+  public void setLearningRate(double lr){
+    this.lr = lr;
+  }
+
 }
+//TODO
+/**
+ * add utilities for debugging
+ * make multithreaded
+ * add pooling layer
+ * add flatten layer
+ * optimise
+ */
