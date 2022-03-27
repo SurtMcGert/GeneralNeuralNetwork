@@ -44,14 +44,25 @@ public class ConvolutionalLayer implements Layer {
         // format the filters into a sparse matrix of weights
         Matrix formattedWeights = convertWeightsToSparseMatrix(input);
 
+        //get each output value
         Matrix multiplied = Matrix.staticMultiply(flattenedInputs, formattedWeights);
-        System.out.println("inputs");
-        input[0].view();
-        System.out.println("sparse weights");
-        formattedWeights.view();
-        System.out.println("multiplied");
-        multiplied.view();
 
+        //format the outupt into arrays of matrices
+        int possibleHorizontalFits = input[0].getColumns() - this.kernalSize + 1;
+        int possibleVerticalFits = input[0].getRows() - this.kernalSize + 1;
+        int outputIndex = 0;
+        for(int i = 0; i < this.rawOutput.length; i++){
+            Matrix m = new Matrix(possibleVerticalFits, possibleHorizontalFits);
+            for(int row = 0; row < possibleVerticalFits; row++){
+                for(int column = 0; column < possibleHorizontalFits; column++){
+                    m.set(row, column, multiplied.valAt(0, outputIndex));
+                    outputIndex++;
+                }
+            }
+            this.rawOutput[i] = m;
+            //put output through activation function
+            this.output[i] = Matrix.staticMap(this.rawOutput[i], (double inp) -> this.activation.function(inp));
+        }
         return this.output;
     }
 
